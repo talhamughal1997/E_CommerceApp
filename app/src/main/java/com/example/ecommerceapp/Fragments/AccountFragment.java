@@ -21,6 +21,8 @@ public class AccountFragment extends Fragment {
         return mainView;
     }
 
-
+    private boolean EditTextValidations() {
+        return false;
+    }
 
 }
