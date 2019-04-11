@@ -16,6 +16,7 @@
 
 
         <ImageView
+            android:id="@+id/account_img_upload"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_gravity="center_horizontal"
@@ -50,7 +51,7 @@
             android:textColorHint="@color/colorAccent">
 
             <EditText
-                android:id="@+id/signup_edttxt_lname"
+                android:id="@+id/account_edttxt_lname"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
@@ -72,7 +73,7 @@
             android:textColorHint="@color/colorAccent">
 
             <EditText
-                android:id="@+id/signup_edttxt_dob"
+                android:id="@+id/account_edttxt_dob"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
@@ -94,7 +95,7 @@
             android:textColorHint="@color/colorAccent">
 
             <EditText
-                android:id="@+id/signup_edttxt_phone"
+                android:id="@+id/account_edttxt_phone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
@@ -116,7 +117,7 @@
             android:textColorHint="@color/colorAccent">
 
             <EditText
-                android:id="@+id/signup_edttxt_email"
+                android:id="@+id/account_edttxt_address"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
