@@ -12,9 +12,11 @@ public class ProgressDialogFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        return new AlertDialog.Builder(getActivity())
-                .setCancelable(false) // if you want user to wait for some process to finish,
+        return new AlertDialog.Builder(this.getActivity())
+                .setCancelable(false)
                 .setView(R.layout.layout_loading_dialog)
                 .create();
     }
+
+
 }

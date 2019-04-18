@@ -1,10 +1,13 @@
 package com.example.ecommerceapp.Fragments;
 
 
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.pm.PackageInfoCompat;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +17,9 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.ecommerceapp.R;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -27,7 +32,7 @@ public class SignUpFragment extends Fragment {
     EditText mEditText_Email, mEditText_Pswd, mEditText_CnfrmPswd;
     Button mSignUp;
     String email, pswd;
-    DialogFragment progressDialog;
+    AlertDialog progressDialog;
 
     FirebaseAuth mFirebaseAuth;
 
@@ -41,7 +46,6 @@ public class SignUpFragment extends Fragment {
         mSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 email = mEditText_Email.getText().toString();
                 pswd = mEditText_Pswd.getText().toString();
                 if (checkTextBoxes()) {
@@ -51,8 +55,6 @@ public class SignUpFragment extends Fragment {
 
             }
         });
-
-
         return mainView;
     }
 
@@ -118,8 +120,11 @@ public class SignUpFragment extends Fragment {
     }
 
     private void showProgressDialog() {
-        progressDialog = new ProgressDialogFragment();
-        progressDialog.show(getActivity().getSupportFragmentManager(), "progressDialog");
+        progressDialog = new AlertDialog.Builder(getActivity())
+                .setView(R.layout.layout_loading_dialog)
+                .setCancelable(false)
+                .create();
+        progressDialog.show();
     }
 
 }

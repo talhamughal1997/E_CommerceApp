@@ -8,6 +8,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.TextInputEditText;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.text.TextUtils;
@@ -16,11 +18,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.example.ecommerceapp.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -31,10 +31,12 @@ import java.io.ByteArrayOutputStream;
 public class AccountFragment extends Fragment implements View.OnClickListener {
 
     private static final int PICK_IMAGE_REQUEST = 1;
+    public static final int REQUEST_CODE = 11;
+    public static final String TAG = "AccountFragment";
 
     View mainView;
-    EditText mEditText_Name, mEditText_Lname, mEditText_DOB, mEditText_Phone, mEditText_Address;
-    Button mBtnSave;
+    TextInputEditText mEditText_Name, mEditText_Lname, mEditText_Phone, mEditText_Address;
+    Button mBtnSave, mBtn_DOB;
     ImageView mImg_Upload;
     Uri imageUri;
     ProgressDialog progressDialog;
@@ -53,11 +55,11 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
         mDatabaseReference = FirebaseDatabase.getInstance().getReference("User");
         mDatabaseReference.child("Image");
 
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(),R.drawable.account_screen);
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.account_screen);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG,100,baos);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         byte[] b = baos.toByteArray();
-        String encode = Base64.encodeToString(b,Base64.DEFAULT);
+        String encode = Base64.encodeToString(b, Base64.DEFAULT);
 
         mDatabaseReference.setValue(encode);
 
@@ -68,7 +70,7 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
         String val1, val2, val3, val4, val5;
         val1 = mEditText_Name.getText().toString();
         val2 = mEditText_Lname.getText().toString();
-        val3 = mEditText_DOB.getText().toString();
+        val3 = mBtn_DOB.getText().toString();
         val4 = mEditText_Phone.getText().toString();
         val5 = mEditText_Address.getText().toString();
 
@@ -82,12 +84,19 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
     private void viewInits() {
         mEditText_Name = mainView.findViewById(R.id.account_edttxt_name);
         mEditText_Lname = mainView.findViewById(R.id.account_edttxt_lname);
-        mEditText_DOB = mainView.findViewById(R.id.account_edttxt_dob);
+        mBtn_DOB = mainView.findViewById(R.id.account_btn_dob);
+        mBtn_DOB.setKeyListener(null);
         mEditText_Phone = mainView.findViewById(R.id.account_edttxt_phone);
         mEditText_Address = mainView.findViewById(R.id.account_edttxt_address);
         mImg_Upload = mainView.findViewById(R.id.account_img_upload);
         mBtnSave = mainView.findViewById(R.id.account_btn_Save);
         progressDialog = new ProgressDialog(getActivity());
+    }
+
+    private void viewListeners() {
+        mImg_Upload.setOnClickListener(this);
+        mBtnSave.setOnClickListener(this);
+        mBtn_DOB.setOnClickListener(this);
     }
 
     private void createFirebase() {
@@ -99,11 +108,6 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(intent, PICK_IMAGE_REQUEST);
-    }
-
-    private void viewListeners() {
-        mImg_Upload.setOnClickListener(this);
-        mBtnSave.setOnClickListener(this);
     }
 
     @Override
@@ -118,6 +122,10 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
                 emptyValidations();
                 break;
             }
+            case R.id.account_btn_dob: {
+                setDateToEditText();
+                break;
+            }
         }
     }
 
@@ -125,14 +133,10 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
 
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null && data.getData() != null) {
-            imageUri = data.getData();
-            Glide.with(getActivity()).load(imageUri).into(mImg_Upload);
-            // mImg_Upload.setImageURI(imageUri);
-        }
+    private void setDateToEditText() {
+        DialogFragment datepicker = new DatePickerFragment();
+        datepicker.setTargetFragment(this, REQUEST_CODE);
+        datepicker.show(getFragmentManager(), "datepicker");
     }
 
     private void clearFragmentStacks() {
@@ -146,6 +150,21 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
     public void onDetach() {
         super.onDetach();
         clearFragmentStacks();
-
     }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case REQUEST_CODE:
+
+                if (resultCode == Activity.RESULT_OK) {
+                    // After Ok code.
+                } else if (resultCode == Activity.RESULT_CANCELED) {
+                    // After Cancel code.
+                }
+
+                break;
+        }
+    }
+
 }

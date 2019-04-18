@@ -21,8 +21,5 @@ public class MainActivity extends AppCompatActivity {
     private void ChangeFragment(){
         FragmentManager fm = getSupportFragmentManager();
         fm.beginTransaction().add(R.id.mainActivity_container, new MainFragment()).setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_enter, R.anim.pop_exit).commit();
-
     }
-
-
 }
