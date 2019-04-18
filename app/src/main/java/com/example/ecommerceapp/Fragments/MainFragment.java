@@ -11,14 +11,14 @@ import android.widget.Button;
 
 import com.example.ecommerceapp.R;
 
-public class MainFragment extends Fragment implements View.OnClickListener{
+public class MainFragment extends Fragment implements View.OnClickListener {
     Button mBtnSignIn, mBtnSignUp;
     View mainView;
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mainView =  inflater.inflate(R.layout.fragment_main, container, false);
+        mainView = inflater.inflate(R.layout.fragment_main, container, false);
         clearFragmentStacks();
         viewInit();
         viewListners();
@@ -50,16 +50,15 @@ public class MainFragment extends Fragment implements View.OnClickListener{
         }
     }
 
-    private void changeFragment(Fragment fragment){
-        getActivity().getSupportFragmentManager().beginTransaction().setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_enter, R.anim.pop_exit).replace(R.id.mainActivity_container,fragment).addToBackStack(null).commit();
+    private void changeFragment(Fragment fragment) {
+        getActivity().getSupportFragmentManager().beginTransaction().setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_enter, R.anim.pop_exit).replace(R.id.mainActivity_container, fragment).addToBackStack(null).commit();
     }
 
-    private void clearFragmentStacks(){
+    private void clearFragmentStacks() {
         FragmentManager fm = getActivity().getSupportFragmentManager();
-        for(int i = 0; i < fm.getBackStackEntryCount(); ++i) {
+        for (int i = 0; i < fm.getBackStackEntryCount(); ++i) {
             fm.popBackStack();
         }
-
     }
 
 }

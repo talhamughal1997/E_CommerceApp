@@ -4,11 +4,14 @@ package com.example.ecommerceapp.Fragments;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +25,8 @@ import com.example.ecommerceapp.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import java.io.ByteArrayOutputStream;
 
 public class AccountFragment extends Fragment implements View.OnClickListener {
 
@@ -45,6 +50,16 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
         viewInits();
         viewListeners();
 
+        mDatabaseReference = FirebaseDatabase.getInstance().getReference("User");
+        mDatabaseReference.child("Image");
+
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(),R.drawable.account_screen);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG,100,baos);
+        byte[] b = baos.toByteArray();
+        String encode = Base64.encodeToString(b,Base64.DEFAULT);
+
+        mDatabaseReference.setValue(encode);
 
         return mainView;
     }
@@ -118,5 +133,19 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
             Glide.with(getActivity()).load(imageUri).into(mImg_Upload);
             // mImg_Upload.setImageURI(imageUri);
         }
+    }
+
+    private void clearFragmentStacks() {
+        FragmentManager fm = getActivity().getSupportFragmentManager();
+        for (int i = 0; i < fm.getBackStackEntryCount(); ++i) {
+            fm.popBackStack();
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        clearFragmentStacks();
+
     }
 }

@@ -3,8 +3,8 @@ package com.example.ecommerceapp.Fragments;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,7 +18,6 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 import static android.support.constraint.Constraints.TAG;
 
@@ -28,12 +27,15 @@ public class SignUpFragment extends Fragment {
     EditText mEditText_Email, mEditText_Pswd, mEditText_CnfrmPswd;
     Button mSignUp;
     String email, pswd;
+    DialogFragment progressDialog;
 
     FirebaseAuth mFirebaseAuth;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mainView = inflater.inflate(R.layout.fragment_sign_up, container, false);
+
+
         viewsInit();
 
         mSignUp.setOnClickListener(new View.OnClickListener() {
@@ -42,8 +44,10 @@ public class SignUpFragment extends Fragment {
 
                 email = mEditText_Email.getText().toString();
                 pswd = mEditText_Pswd.getText().toString();
-                signUpWithFirebase();
-                changeFragment(new AccountFragment());
+                if (checkTextBoxes()) {
+                    showProgressDialog();
+                    signUpWithFirebase();
+                }
 
             }
         });
@@ -71,12 +75,14 @@ public class SignUpFragment extends Fragment {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            FirebaseUser user = mFirebaseAuth.getCurrentUser();
+                            if (progressDialog != null) progressDialog.dismiss();
+                            //FirebaseUser user = mFirebaseAuth.getCurrentUser();
+                            changeFragment(new AccountFragment());
                         } else {
                             // If sign in fails, display a message to the user.
+                            if (progressDialog != null) progressDialog.dismiss();
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                            Toast.makeText(getActivity(), "Authentication failed.",
+                            Toast.makeText(getActivity(), task.getException().getMessage(),
                                     Toast.LENGTH_SHORT).show();
                         }
 
@@ -84,8 +90,39 @@ public class SignUpFragment extends Fragment {
                     }
                 });
 
+
     }
 
+    private boolean checkTextBoxes() {
+        if (mEditText_Email.getText().toString().trim().equals("")) {
+            Toast.makeText(getActivity(), "Email is Empty", Toast.LENGTH_SHORT).show();
+            mEditText_Email.requestFocus();
+            return false;
 
+        } else if (mEditText_Pswd.getText().toString().trim().equals("")) {
+            Toast.makeText(getActivity(), "Password is Empty", Toast.LENGTH_SHORT).show();
+            mEditText_Pswd.requestFocus();
+            return false;
+
+        } else if (mEditText_CnfrmPswd.getText().toString().trim().equals("")) {
+            Toast.makeText(getActivity(), "Confirm Password is Empty", Toast.LENGTH_SHORT).show();
+            mEditText_CnfrmPswd.requestFocus();
+            return false;
+        } else if (!mEditText_Pswd.getText().toString().trim().equals(mEditText_CnfrmPswd.getText().toString().trim())) {
+            Toast.makeText(getActivity(), "Confirm Password Not Match", Toast.LENGTH_SHORT).show();
+            mEditText_CnfrmPswd.requestFocus();
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private void showProgressDialog() {
+        progressDialog = new ProgressDialogFragment();
+        progressDialog.show(getActivity().getSupportFragmentManager(), "progressDialog");
+    }
 
 }
+
+
+
