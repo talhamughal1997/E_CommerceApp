@@ -13,6 +13,21 @@ import java.util.Date;
 
 public class DatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
 
+
+    public static final String EXTRA_DATE = "com.bignerdranch.android.criminalintent.date";
+
+    private Date mDate;
+
+    public static DatePickerFragment newInstance(Date date) {
+        Bundle args = new Bundle();
+        args.putSerializable(EXTRA_DATE, date);
+
+        DatePickerFragment fragment = new DatePickerFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final Calendar calendar = Calendar.getInstance();
@@ -33,7 +48,6 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
         Intent i = new Intent()
                 .putExtra("date", date);
         getTargetFragment().onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, i);
-
 
 
     }

@@ -27,12 +27,15 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.ByteArrayOutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class AccountFragment extends Fragment implements View.OnClickListener {
 
     private static final int PICK_IMAGE_REQUEST = 1;
     public static final int REQUEST_CODE = 11;
     public static final String TAG = "AccountFragment";
+    Date date;
 
     View mainView;
     TextInputEditText mEditText_Name, mEditText_Lname, mEditText_Phone, mEditText_Address;
@@ -134,7 +137,14 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
     }
 
     private void setDateToEditText() {
-        DialogFragment datepicker = new DatePickerFragment();
+        DialogFragment datepicker;
+        if (date == null) {
+            datepicker = new DatePickerFragment();
+
+        } else {
+            datepicker = DatePickerFragment.newInstance(date);
+        }
+
         datepicker.setTargetFragment(this, REQUEST_CODE);
         datepicker.show(getFragmentManager(), "datepicker");
     }
@@ -158,7 +168,11 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
             case REQUEST_CODE:
 
                 if (resultCode == Activity.RESULT_OK) {
-                    // After Ok code.
+
+                    date = (Date) data.getSerializableExtra("date");
+                    String shortDate = SimpleDateFormat.getDateInstance().format(date);
+                    mBtn_DOB.setText(String.valueOf(shortDate));
+
                 } else if (resultCode == Activity.RESULT_CANCELED) {
                     // After Cancel code.
                 }
