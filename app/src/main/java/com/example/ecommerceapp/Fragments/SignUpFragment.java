@@ -1,12 +1,9 @@
 package com.example.ecommerceapp.Fragments;
 
 
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.pm.PackageInfoCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,12 +14,14 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.ecommerceapp.R;
-import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.HashMap;
 
 import static android.support.constraint.Constraints.TAG;
 
@@ -35,6 +34,7 @@ public class SignUpFragment extends Fragment {
     AlertDialog progressDialog;
 
     FirebaseAuth mFirebaseAuth;
+    DatabaseReference mDatabaseReference;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -77,6 +77,7 @@ public class SignUpFragment extends Fragment {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
+                            saveInFirebase();
                             if (progressDialog != null) progressDialog.dismiss();
                             //FirebaseUser user = mFirebaseAuth.getCurrentUser();
                             changeFragment(new AccountFragment());
@@ -91,7 +92,17 @@ public class SignUpFragment extends Fragment {
                         // ...
                     }
                 });
+    }
 
+    private void saveInFirebase() {
+
+        mDatabaseReference = FirebaseDatabase.getInstance().getReference().child("Users").child("MailPassword").child(mFirebaseAuth.getCurrentUser().getUid());
+
+        HashMap<String, String> map = new HashMap<>();
+        map.put("email", email);
+        map.put("pswd", pswd);
+
+        mDatabaseReference.setValue(map);
 
     }
 
