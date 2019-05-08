@@ -26,8 +26,14 @@ import com.bumptech.glide.Glide;
 import com.example.ecommerceapp.Models.UserModel;
 import com.example.ecommerceapp.R;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseException;
+import com.google.firebase.FirebaseTooManyRequestsException;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.PhoneAuthCredential;
+import com.google.firebase.auth.PhoneAuthProvider;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -36,12 +42,15 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
 
 public class AccountFragment extends Fragment implements View.OnClickListener {
 
     private static final int PICK_IMAGE_REQUEST = 1;
     public static final int DOB_REQUEST_CODE = 11;
     public static final String TAG = "AccountFragment";
+    public static String VERTIFICATION_ID;
     Date date;
 
     View mainView;
@@ -54,8 +63,10 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
     FirebaseDatabase mFirebaseDatabase;
     DatabaseReference mDatabaseReference;
 
-    String uid, imgEncode;
+    String uid, imgEncode, verifyId;
     String fName, lName, dob, phone, adress;
+
+    PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -63,6 +74,7 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
         mFirebaseAuth = FirebaseAuth.getInstance();
         viewInits();
         viewListeners();
+        callbackListener();
 
         return mainView;
     }
@@ -109,26 +121,6 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
         startActivityForResult(intent, PICK_IMAGE_REQUEST);
     }
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.account_img_upload: {
-                pickImage();
-                break;
-            }
-            case R.id.account_btn_Save: {
-                if (!emptyValidations()) {
-                    saveInfo();
-                }
-                break;
-            }
-            case R.id.account_btn_dob: {
-                setDateToEditText();
-                break;
-            }
-        }
-    }
-
     private void putDataInToVar() {
         fName = mEditText_Name.getText().toString();
         lName = mEditText_Lname.getText().toString();
@@ -155,17 +147,24 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
 
     private void saveInfo() {
         progressDialog.show();
-        putDataInToVar();
         mDatabaseReference = FirebaseDatabase.getInstance().getReference().child("Users").child("UsersData").child(mFirebaseAuth.getCurrentUser().getUid());
         UserModel userModel = new UserModel(fName, lName, dob, phone, adress, imgEncode);
         mDatabaseReference.setValue(userModel).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
+                    Toast.makeText(getActivity(), "Success", Toast.LENGTH_SHORT).show();
                     progressDialog.dismiss();
+                    changeFragment(new OtpFragment());
+
                 } else {
                     progressDialog.dismiss();
                 }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -187,6 +186,77 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
         FragmentManager fm = getActivity().getSupportFragmentManager();
         for (int i = 0; i < fm.getBackStackEntryCount(); ++i) {
             fm.popBackStack();
+        }
+    }
+
+    private void changeFragment(Fragment fragment) {
+        getActivity().getSupportFragmentManager().beginTransaction().setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_enter, R.anim.pop_exit).replace(R.id.mainActivity_container, fragment).addToBackStack(null).commit();
+    }
+
+    private void sendVeriificationCode(String phoneNumber) {
+        PhoneAuthProvider.getInstance().verifyPhoneNumber(
+                "+92" + phoneNumber,        // Phone number to verify
+                60,                 // Timeout duration
+                TimeUnit.SECONDS,   // Unit of timeout
+                getActivity(),               // Activity (for callback binding)
+                mCallbacks);        // OnVerificationStateChangedCallbacks
+    }
+
+    private void callbackListener() {
+
+        mCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+
+            @Override
+            public void onVerificationCompleted(PhoneAuthCredential credential) {
+                Toast.makeText(getActivity(), "Verification Complete", Toast.LENGTH_SHORT).show();
+                saveInfo();
+                Toast.makeText(getActivity(), credential.getSmsCode(), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onVerificationFailed(FirebaseException e) {
+                Toast.makeText(getActivity(), "Verification Failed", Toast.LENGTH_SHORT).show();
+                progressDialog.dismiss();
+                if (e instanceof FirebaseAuthInvalidCredentialsException) {
+                    // Invalid request
+                    Toast.makeText(getActivity(), "InValid Phone Number", Toast.LENGTH_SHORT).show();
+                    // ...
+                } else if (e instanceof FirebaseTooManyRequestsException) {
+                    Toast.makeText(getActivity(), "Too Many Request", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+
+            @Override
+            public void onCodeSent(String verificationId,
+                                   PhoneAuthProvider.ForceResendingToken token) {
+                VERTIFICATION_ID = verificationId;
+                Toast.makeText(getActivity(), verificationId, Toast.LENGTH_SHORT).show();
+
+            }
+        };
+
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.account_img_upload: {
+                pickImage();
+                break;
+            }
+            case R.id.account_btn_Save: {
+                progressDialog.show();
+                if (emptyValidations()) {
+                    putDataInToVar();
+                    sendVeriificationCode(phone);
+                }
+                break;
+            }
+            case R.id.account_btn_dob: {
+                setDateToEditText();
+                break;
+            }
         }
     }
 

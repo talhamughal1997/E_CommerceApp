@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.ecommerceapp.Controllers.Utills;
 import com.example.ecommerceapp.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -32,7 +33,6 @@ public class SignUpFragment extends Fragment {
     Button mSignUp;
     String email, pswd;
     AlertDialog progressDialog;
-
     FirebaseAuth mFirebaseAuth;
     DatabaseReference mDatabaseReference;
 
@@ -67,10 +67,6 @@ public class SignUpFragment extends Fragment {
         mFirebaseAuth = FirebaseAuth.getInstance();
     }
 
-    private void changeFragment(Fragment fragment) {
-        getActivity().getSupportFragmentManager().beginTransaction().setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_enter, R.anim.pop_exit).replace(R.id.mainActivity_container, fragment).addToBackStack(null).commit();
-    }
-
     private void signUpWithFirebase() {
         mFirebaseAuth.createUserWithEmailAndPassword(email, pswd)
                 .addOnCompleteListener(getActivity(), new OnCompleteListener<AuthResult>() {
@@ -79,17 +75,13 @@ public class SignUpFragment extends Fragment {
                         if (task.isSuccessful()) {
                             saveInFirebase();
                             if (progressDialog != null) progressDialog.dismiss();
-                            //FirebaseUser user = mFirebaseAuth.getCurrentUser();
-                            changeFragment(new AccountFragment());
+                           changeFragment(new AccountFragment());
                         } else {
-                            // If sign in fails, display a message to the user.
                             if (progressDialog != null) progressDialog.dismiss();
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
                             Toast.makeText(getActivity(), task.getException().getMessage(),
                                     Toast.LENGTH_SHORT).show();
                         }
-
-                        // ...
                     }
                 });
     }
@@ -101,9 +93,7 @@ public class SignUpFragment extends Fragment {
         HashMap<String, String> map = new HashMap<>();
         map.put("email", email);
         map.put("pswd", pswd);
-
         mDatabaseReference.setValue(map);
-
     }
 
     private boolean checkTextBoxes() {
@@ -137,6 +127,11 @@ public class SignUpFragment extends Fragment {
                 .create();
         progressDialog.show();
     }
+
+    private void changeFragment(Fragment fragment) {
+        getActivity().getSupportFragmentManager().beginTransaction().setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_enter, R.anim.pop_exit).replace(R.id.mainActivity_container, fragment).addToBackStack(null).commit();
+    }
+
 
 }
 

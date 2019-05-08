@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.example.ecommerceapp.Controllers.Utills;
 import com.example.ecommerceapp.R;
 
 public class MainFragment extends Fragment implements View.OnClickListener {
@@ -50,15 +51,16 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    private void changeFragment(Fragment fragment) {
-        getActivity().getSupportFragmentManager().beginTransaction().setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_enter, R.anim.pop_exit).replace(R.id.mainActivity_container, fragment).addToBackStack(null).commit();
-    }
-
     private void clearFragmentStacks() {
         FragmentManager fm = getActivity().getSupportFragmentManager();
         for (int i = 0; i < fm.getBackStackEntryCount(); ++i) {
             fm.popBackStack();
         }
     }
+
+    private void changeFragment(Fragment fragment) {
+        getActivity().getSupportFragmentManager().beginTransaction().setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_enter, R.anim.pop_exit).replace(R.id.mainActivity_container, fragment).addToBackStack(null).commit();
+    }
+
 
 }
